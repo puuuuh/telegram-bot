@@ -4,6 +4,7 @@
 
 pub use telegram_bot_raw::CanAnswerCallbackQuery;
 pub use telegram_bot_raw::CanAnswerInlineQuery;
+pub use telegram_bot_raw::CanExportChatInviteLink;
 pub use telegram_bot_raw::CanLeaveChat;
 pub use telegram_bot_raw::CanSendChatAction;
 pub use telegram_bot_raw::{CanDeleteMessage, CanForwardMessage};
@@ -20,7 +21,9 @@ pub use telegram_bot_raw::{CanReplySendDocument, CanSendDocument};
 pub use telegram_bot_raw::{CanReplySendLocation, CanSendLocation};
 pub use telegram_bot_raw::{CanReplySendMessage, CanSendMessage};
 pub use telegram_bot_raw::{CanReplySendPhoto, CanSendPhoto};
+pub use telegram_bot_raw::{CanReplySendPoll, CanSendPoll, CanStopPoll};
 pub use telegram_bot_raw::{CanReplySendVenue, CanSendVenue};
+pub use telegram_bot_raw::{CanReplySendVideo, CanSendVideo};
 pub use telegram_bot_raw::{CanRestrictChatMemberForChat, CanRestrictChatMemberForUser};
 pub use telegram_bot_raw::{CanUnbanChatMemberForChat, CanUnbanChatMemberForUser};
 pub use telegram_bot_raw::{ToReplyRequest, ToRequest};

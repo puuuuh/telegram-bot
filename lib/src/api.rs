@@ -5,13 +5,13 @@ use std::sync::{
 use std::time::Duration;
 
 use futures::{Future, FutureExt};
-use tokio::timer::Timeout;
+use tokio::time::timeout;
 use tracing_futures::Instrument;
 
 use telegram_bot_raw::{HttpRequest, Request, ResponseType};
 
 use crate::connector::{default_connector, Connector};
-use crate::errors::Error;
+use crate::errors::{Error, ErrorKind};
 use crate::stream::UpdatesStream;
 
 /// Main type for sending requests to the Telegram bot API.
@@ -25,7 +25,7 @@ struct ApiInner {
 }
 
 impl Api {
-    ///  create a new `Api` instance.
+    /// Create a new `Api` instance.
     ///
     /// # Example
     ///
@@ -39,10 +39,15 @@ impl Api {
     /// let api = Api::new(telegram_token);
     /// # }
     /// ```
-    pub fn new<T: AsRef<str>>(token: T) -> Api {
+    pub fn new<T: AsRef<str>>(token: T) -> Self {
+        Self::with_connector(token, default_connector())
+    }
+
+    /// Create a new `Api` instance wtih custom connector.
+    pub fn with_connector<T: AsRef<str>>(token: T, connector: Box<dyn Connector>) -> Self {
         Api(Arc::new(ApiInner {
             token: token.as_ref().to_string(),
-            connector: default_connector(),
+            connector,
             next_request_id: AtomicUsize::new(0),
         }))
     }
@@ -123,7 +128,12 @@ impl Api {
         let api = self.clone();
         let request = request.serialize();
         async move {
-            match Timeout::new(api.send_http_request::<Req::Response>(request?), duration).await {
+            match timeout(
+                duration,
+                api.send_http_request::<Req::Response>(request.map_err(ErrorKind::from)?),
+            )
+            .await
+            {
                 Err(_) => Ok(None),
                 Ok(Ok(result)) => Ok(Some(result)),
                 Ok(Err(error)) => Err(error),
@@ -154,7 +164,10 @@ impl Api {
     ) -> impl Future<Output = Result<<Req::Response as ResponseType>::Type, Error>> + Send {
         let api = self.clone();
         let request = request.serialize();
-        async move { api.send_http_request::<Req::Response>(request?).await }
+        async move {
+            api.send_http_request::<Req::Response>(request.map_err(ErrorKind::from)?)
+                .await
+        }
     }
 
     async fn send_http_request<Resp: ResponseType>(
@@ -176,17 +189,17 @@ impl Api {
                 }, "response received"
             );
 
-            let response = Resp::deserialize(http_response)?;
+            let response = Resp::deserialize(http_response).map_err(ErrorKind::from)?;
             tracing::trace!("response deserialized");
             Ok(response)
         }
-            .map(|result| {
-                if let Err(ref error) = result {
-                    tracing::error!(error = %error);
-                }
-                result
-            })
-            .instrument(span)
-            .await
+        .map(|result| {
+            if let Err(ref error) = result {
+                tracing::error!(error = %error);
+            }
+            result
+        })
+        .instrument(span)
+        .await
     }
 }

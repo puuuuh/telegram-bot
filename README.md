@@ -1,6 +1,8 @@
 Rust Telegram Bot Library
 =========================
 [![Build Status](https://img.shields.io/travis/telegram-rs/telegram-bot/master.svg)](https://travis-ci.org/telegram-rs/telegram-bot)
+[![Tests](https://github.com/telegram-rs/telegram-bot/workflows/Tests/badge.svg)](https://github.com/telegram-rs/telegram-bot/actions?workflow=Tests)
+[![Tests](https://github.com/telegram-rs/telegram-bot/workflows/Fmt/badge.svg)](https://github.com/telegram-rs/telegram-bot/actions?workflow=Fmt)
 [![License](https://img.shields.io/github/license/telegram-rs/telegram-bot.svg)]()
 [![Crates.io](https://img.shields.io/crates/v/telegram-bot.svg)](https://crates.io/crates/telegram-bot)
 
@@ -58,7 +60,7 @@ You can find a bigger examples in the `examples`.
 This library is available via `crates.io`. In order to use it, just add this to your `Cargo.toml`:
 
 ```
-telegram-bot = "0.6"
+telegram-bot = "0.7"
 ```
 
 The library allows you to do E2E-testing of your bot easily: just specify `TELEGRAM_API_URL` environment variable to point to your fake Telegram test server.
